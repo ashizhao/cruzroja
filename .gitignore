@@ -91,4 +91,9 @@ ENV/
 
 # OSC .DS_Store
 .DS_Store
+
+# Local settings
 aed/settings.py
+
+# Emacs backup
+*~
