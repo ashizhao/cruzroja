@@ -1,0 +1,195 @@
+{% extends "craed/base.html" %}
+
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" 
+      href="{% static 'craed/list.css' %}" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet"
+      href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+<script src="{% static 'leaflet/js/LeafletWidget.js' %}"></script>
+<link rel="stylesheet" type="text/css" 
+      href="{% static 'leaflet/css/LeafletWidget.css' %}"></link>
+{% endblock %}
+
+{% block content %}
+
+<div id="aedlist">
+  <div id="searchbox" class="bare">
+    <form action="list" method="get">
+      <div id="searchfieldandbutton" class="bare">
+	<input id="searchfield" class="bare" type="search" name="search" 
+	       placeholder="Search AEDs..."
+	       {% if view.search %} value="{{ view.search }}" {% endif %}>
+	<input id="searchbutton" class="bare" type="submit" value="Search"> 
+      </div>
+      <div id="searchoptions">
+	<input class="searchoption" type="checkbox" 
+	       name="nearby" value="true"
+	       {% if view.nearby %} checked {% endif %}>
+	<label for="nearby">nearby</label>
+	<input class="searchoption" type="checkbox" 
+	       name="private" value="true"
+	       {% if view.private %} checked {% endif %}>
+	<label for="private">private</label>
+	<input class="searchoption" type="checkbox" 
+	       name="unverified" value="true"
+	       {% if view.unverified %} checked {% endif %}>
+	<label for="unverified">unverified</label>
+	<input class="hidden" type="text" name="lat"
+	       value="{{ view.lat }}">
+	<input class="hidden" type="text" name="lng"
+	       value="{{ view.lng }}">
+      </div>
+    </form>
+  </div>
+  <div id="results">
+    <ul class="aeds">
+      {% if aed_list %}
+      {% for aed in aed_list %}
+      <li {% if not aed.verified %}
+	  class="aeds unverified"
+	  {% elif aed.public %}
+          class="aeds public"
+          {% else %}
+          class="aeds private"
+	  {% endif %}
+	  id="{{ aed.pk }}">{{ aed.name }}</li>
+      {% endfor %}
+      {% else %}
+      <p>No AED's found</p>
+      {% endif %}
+    </ul>
+  </div>
+</div>
+
+<div id="mapid"></div>
+
+<script>
+
+  // Popup when new marker is clicked
+  var newPointFunction = function(e) {
+    console.log('HI');
+    console.log(e);
+    console.log(e.target.getPopup())
+
+    var popup = e.target.getPopup();
+    if (popup) {
+      e.target.unbindPopup();
+    }
+
+    // create new popup 
+    var popupContent = '<p><b>New AED</b><br/>'
+        + '<p>Click here to <a href="/craed/update'
+	+ '?lat=' + e.latlng.lat 
+	+ '&lng=' + e.latlng.lng 
+	+ '">enter details</a>';
+
+    e.target.bindPopup(popupContent);
+    
+    console.log('Popup created');
+    
+    // center view
+    widget.map.setView(e.latlng);
+
+    // bind and open popup
+    e.target.openPopup();
+
+  }
+  
+  var options = {
+    map_id: 'mapid',
+    lat: {{ view.lat }},
+    lng: {{ view.lng }},
+    zoom: 13,
+    newPointFunction: newPointFunction,
+  };
+
+  var widget = new LeafletMultiPointWidget(options);
+
+  // Popup when existing marker is clicked
+  var markerClicked = function(e) {
+
+    // grab id
+    var id = widget.markerIdMap[this._leaflet_id];
+    
+    $.getJSON("http://localhost:8000/craed/detail/" + id, 
+              function(data) {
+
+                 // unselect current item
+                 $( '.aeds.selected' ).removeClass('selected');
+
+                 // select current item
+                 $( '#' + id ).addClass('selected');
+     
+                 // create popup 
+       	         var popupContent = '<p><b>' 
+                          + data.name 
+                          + '</b><br/>';
+                 popupContent += '<span style="font-size: small; font-style: italic;">';
+	         if (data.public) {
+	           popupContent += 'available for public use';
+                 } else {
+	           popupContent += 'private use only';
+                 }
+                 popupContent += '</span></p>';
+
+	         if (data.description) {
+	           popupContent += data.description;
+	         }
+	 
+                 popupContent += '<p>';
+	         if (data.address) {
+	           popupContent += data.address;
+                   if (data.number) {
+                     popupContent += ' ' + data.number;
+                   }
+                   popupContent += '<br/>';
+                 }
+	         if (data.neighborhood) {
+	           popupContent += data.neighborhood + '<br/>';
+                 }
+                 popupContent += data.city
+                              + ', ' + data.state + ', ' 
+                              + data.country + '<br/>';
+                 popupContent += data.zipcode;
+                 popupContent += '</p>';
+
+                 popupContent += '<p>Created on: ' 
+                        + data.date_created + '<br/>'
+                        + 'Last modified on: '
+	                + data.date_modified + '</p>';
+
+                 popupContent += '<p>Click here to <a href="/craed/update/'
+                        + id + '">update details</a>';
+
+                 // center view
+                 widget.map.setView(new L.LatLng(data.location.y,
+                                               data.location.x));
+
+                 // bind and open popup
+                 e.target.bindPopup(popupContent).openPopup();
+
+               });
+    }
+
+  // add points
+  {% for aed in aed_list %}
+    widget.addPoint({{ aed.location.y }}, {{ aed.location.x }}, 
+                  {{ aed.pk }}, markerClicked);
+  {% endfor %}
+
+  // EVENT HANDLERS
+
+  // Popup when entry is clicked
+  $('li.aeds').click(function() {
+      widget.markers
+          .getLayer(widget.pointIdMap[$(this)[0].id])
+          .fireEvent('click');
+  });
+
+</script>
+
+{% endblock %}
