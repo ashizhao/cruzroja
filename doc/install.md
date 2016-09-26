@@ -59,5 +59,26 @@ From https://trac.osgeo.org/postgis/wiki/UsersWikiPostGIS22UbuntuPGSQL95Apt:
 
 	sudo pip3 install django==1.10
 
-## Creating super user
-   
+## Clone repository
+
+	git clone git@cruzroja.ucsd.edu:aed
+
+You might have done that already if you're reading this inside a
+cloned repo.
+
+## Create your local settings file
+
+A template is found in the doc/settings.py.
+
+	cp doc/settings.template aed/settings.py
+	
+Edit aed/setting.py to reflect your local settings. Important settings
+are 
+
+- SECRET_KEY
+- DATABASES: NAME, USER, and PASSWORD
+
+## Initialize database
+
+Steps here depend whether you're creating a local copy or using the database at cruzroja.ucsd.edu.
+
