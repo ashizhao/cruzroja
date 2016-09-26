@@ -50,9 +50,24 @@ When you're ready push changes back to the repository with
 When you're changes are good enough contact the admin to merge your
 changes into the master branch.
 
-# Running on your local copy
+# Running server on your local copy
 
+Your copy of the repository is complete and can run locally if you
+have all the required software installed. See install.md for
+installation instructions.
 
+If you run your database locally make sure the appropriate settings
+are reflected in the settings.py file.
+
+You might alto want to connect to the remote database at
+cruzroja.ucsd.edu. In this case you will need to ssh and tunnel the
+port 5432. For example, run:
+
+	ssh -L5432:localhost:5432 ties@cruzroja.ucsd.edu
+	
+before starting your server will connect to the server at cruzroja
+rather than your local server. You may need to stop your local server
+in case of a port conflict.
 
 # Running on cruzroja.ucsd.edu (NOT RECOMMENDED)
 
