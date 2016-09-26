@@ -50,8 +50,11 @@ When you're ready push changes back to the repository with
 When you're changes are good enough contact the admin to merge your
 changes into the master branch.
 
+# Running on your local copy
 
-# Running on cruzroja.ucsd.edu
+
+
+# Running on cruzroja.ucsd.edu (NOT RECOMMENDED)
 
 You will need to ssh to the ties account using:
 
