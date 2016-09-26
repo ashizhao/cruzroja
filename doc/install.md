@@ -2,7 +2,7 @@
 
 The following instructions have been teste on ubuntu 16.04 server edition.
 
-See https://docs.djangoproject.com/en/1.10/intro/install/ for detailed installation on other platforms.
+See https://docs.djangoproject.com/en/1.10/intro/install/ and https://docs.djangoproject.com/en/1.10/ref/contrib/gis/install/ for detailed installation on other platforms.
 
 # Installing Postgis and libraries
 
@@ -44,6 +44,10 @@ From https://trac.osgeo.org/postgis/wiki/UsersWikiPostGIS22UbuntuPGSQL95Apt:
 
 	sudo apt-get install postgis
 
+## Install psycopg2
+
+	sudo apt-get install python3-psycopg2
+
 # Installing Django
 
 ## Setting up python3 as default
@@ -58,6 +62,10 @@ From https://trac.osgeo.org/postgis/wiki/UsersWikiPostGIS22UbuntuPGSQL95Apt:
 ## Installing django
 
 	sudo pip3 install django==1.10
+
+## Installing django-braces
+
+	sudo apt-get install python3-django-braces
 
 ## Clone repository
 
@@ -77,8 +85,4 @@ are
 
 - SECRET_KEY
 - DATABASES: NAME, USER, and PASSWORD
-
-## Initialize database
-
-Steps here depend whether you're creating a local copy or using the database at cruzroja.ucsd.edu.
 
